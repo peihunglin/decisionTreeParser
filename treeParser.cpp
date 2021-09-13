@@ -41,6 +41,15 @@ void printTree(treeNode* root, int treeLevel)
   if(root == nullptr)
     return;
 
+  vector<treeEdge> edges = root->getEdges();
+  vector<treeNode*> children = root->getChildren();
+  // the edge and child node are loosely coupled now, check the numbers before printing.   
+  if(edges.size() != children.size())
+  {
+    cerr<< "edges and children nodes number mismatch" << endl;
+    return;
+  }    
+
   if(root->isLeafNode())
   {
     cout << ": " << root->getLabel() ;
@@ -51,8 +60,6 @@ void printTree(treeNode* root, int treeLevel)
   }
   else
   {
-    vector<treeEdge> edges = root->getEdges();
-    vector<treeNode*> children = root->getChildren();
     for(int i=0; i < edges.size(); ++i)
     {
       if(root->isLeafNode() == false)
