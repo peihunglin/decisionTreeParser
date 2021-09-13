@@ -27,9 +27,9 @@ string treeEdge::getRelation()
    Note: I am reusing the node class to represent leaf node as well. The leaf node has only label, but no feature associated with it.
 */
 
-void treeNode::addLeafNode(int label)
+void treeNode::addLeafNode(int label, float numObserved, float numMisClassfied)
 {
-  treeNode* newNode = new treeNode(label);
+  treeNode* newNode = new treeNode(label, numObserved, numMisClassfied);
   this->addChild(newNode);
 }
 
@@ -44,6 +44,10 @@ void printTree(treeNode* root, int treeLevel)
   if(root->isLeafNode())
   {
     cout << ": " << root->getLabel() ;
+    cout << " (" << root->getObservedNum(); 
+    if(root->getMisClassfied() > 0.f)
+      cout << "/" <<  root->getMisClassfied();
+    cout << ")";
   }
   else
   {
@@ -111,6 +115,8 @@ int main(int argc, char *argv[]){
              float threshold = std::stof(match.str(3));
              bool hasleaf = !match.str(4).empty();  // 4th matched group represents leaf node
              int label = (match.str(5).empty()) ? -999 : std::stoi(match.str(5));
+             float numObserved = (match.str(6).empty()) ? 0.f : std::stoi(match.str(6));
+             float numMisClassfied = (match.str(8).empty()) ? 0.f : std::stoi(match.str(8));
              //cout << "hasleaf:" << hasleaf << " feature: " << feature << "; relation: " << r << threshold  << " label: " << label << endl;
              relationtype rtype;
              if(r.compare("<=") == 0)
@@ -155,7 +161,7 @@ int main(int argc, char *argv[]){
                if(hasleaf)
                {
                  //cout << "adding leaf from : " << cur->getFeature() << " sizeof stack: " << nodeStack.size()<< endl;
-                 cur->addLeafNode(label);
+                 cur->addLeafNode(label, numObserved, numMisClassfied);
                } 
              }
          }
