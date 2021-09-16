@@ -68,7 +68,19 @@ public:
         return write(val);
     }
 
+    csvfile& addEmptyCell()
+    {
+       return write();
+    }
+
 private:
+
+    csvfile& write ()
+    {
+        fs_ << separator_;
+        return *this;
+    };
+
     template<typename T>
     csvfile& write (const T& val)
     {

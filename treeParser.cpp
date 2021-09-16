@@ -35,10 +35,12 @@ void treeNode::addLeafNode(int label, float numObserved, float numMisClassfied)
   this->addChild(newNode);
 }
 
-void insertMap(treeNode* node, std::unordered_map<treeNode*, int>& mymap, int idx)
+void insertMap(treeNode* node, std::unordered_map<treeNode*, int>& mymap)
 {
+  static int idx;
   if(mymap.find(node) == mymap.end())
   {
+    ++idx;
     mymap.insert({node, idx});
   }
 
@@ -46,11 +48,11 @@ void insertMap(treeNode* node, std::unordered_map<treeNode*, int>& mymap, int id
 
 // Print function to print out tree content to reproduce the text from the input text file.
 
-void printCSV(treeNode* root, csvfile& csv, int treeLevel, unordered_map<treeNode*, int>& mymap, int idx)
+void printCSV(treeNode* root, csvfile& csv, int treeLevel, unordered_map<treeNode*, int>& mymap)
 {
   if(root == nullptr)
     return;
-  insertMap(root, mymap, ++idx);
+  insertMap(root, mymap);
   bool hasChild = !(root->isLeafNode());
   vector<treeEdge> edges = root->getEdges();
   vector<treeNode*> children = root->getChildren();
@@ -61,27 +63,32 @@ void printCSV(treeNode* root, csvfile& csv, int treeLevel, unordered_map<treeNod
     cerr<< "edges and children nodes number mismatch" << endl;
     return;
   } 
-  csv << mymap.find(root)->second << treeLevel;
+  csv << mymap.find(root)->second << treeLevel << root->getFeature();
 
   if(root->isLeafNode())
   {
-    csv << hasChild << ""  << "" << "" << endrow;
+    csv << root->getLabel();
+    csv << hasChild << "";
+    csv.addEmptyCell(); 
+    csv.addEmptyCell(); 
+    csv << endrow;
   }
   else
   {
+    csv.addEmptyCell(); 
     string relationstr = edges[0].getRelation() + to_string(edges[0].getThreshold()); 
     csv << hasChild << relationstr ;
 
 
     for(int i=0; i < children.size(); ++i)
     {
-      insertMap(children[i], mymap,++idx);
+      insertMap(children[i], mymap);
       csv << mymap.find(children[i])->second; 
     }
     csv << endrow;
     for(int i=0; i < edges.size(); ++i)
     {
-      printCSV(children[i], csv, treeLevel+1, mymap, idx);
+      printCSV(children[i], csv, treeLevel+1, mymap);
     }
   }
 }
@@ -234,12 +241,11 @@ int main(int argc, char *argv[]){
    try {
      csvfile csv("decisionTree.csv"); 
 
-     csv << "NodeID" << "level" << "hasChild" << "relation" << "trueNode" << "falseNode"  << endrow;
+     csv << "NodeID" << "level" << "feature" << "label" << "hasChild"  << "relation" << "trueNode" << "falseNode"  << endrow;
 
      unordered_map<treeNode*, int> mymap;
-     static int idx = 0; 
 
-     printCSV(root, csv,  0, mymap, idx);
+     printCSV(root, csv,  0, mymap);
    }
    catch (const std::exception &ex)
     {
