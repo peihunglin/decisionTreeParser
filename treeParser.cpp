@@ -1,4 +1,6 @@
 #include "treeParser.hpp"
+#include "csvfile.h"
+
 
 bool debug = true;
 
@@ -33,6 +35,56 @@ void treeNode::addLeafNode(int label, float numObserved, float numMisClassfied)
   this->addChild(newNode);
 }
 
+void insertMap(treeNode* node, std::unordered_map<treeNode*, int>& mymap, int idx)
+{
+  if(mymap.find(node) == mymap.end())
+  {
+    mymap.insert({node, idx});
+  }
+
+}
+
+// Print function to print out tree content to reproduce the text from the input text file.
+
+void printCSV(treeNode* root, csvfile& csv, int treeLevel, unordered_map<treeNode*, int>& mymap, int idx)
+{
+  if(root == nullptr)
+    return;
+  insertMap(root, mymap, ++idx);
+  bool hasChild = !(root->isLeafNode());
+  vector<treeEdge> edges = root->getEdges();
+  vector<treeNode*> children = root->getChildren();
+  // the edge and child node are loosely coupled now, check the numbers before printing.   
+
+  if(edges.size() != children.size())
+  {
+    cerr<< "edges and children nodes number mismatch" << endl;
+    return;
+  } 
+  csv << mymap.find(root)->second << treeLevel;
+
+  if(root->isLeafNode())
+  {
+    csv << hasChild << ""  << "" << "" << endrow;
+  }
+  else
+  {
+    string relationstr = edges[0].getRelation() + to_string(edges[0].getThreshold()); 
+    csv << hasChild << relationstr ;
+
+
+    for(int i=0; i < children.size(); ++i)
+    {
+      insertMap(children[i], mymap,++idx);
+      csv << mymap.find(children[i])->second; 
+    }
+    csv << endrow;
+    for(int i=0; i < edges.size(); ++i)
+    {
+      printCSV(children[i], csv, treeLevel+1, mymap, idx);
+    }
+  }
+}
 
 // Print function to print out tree content to reproduce the text from the input text file.
 
@@ -177,4 +229,22 @@ int main(int argc, char *argv[]){
       inputfilestream.close(); 
    }
    printTree(root, 0);
+
+
+   try {
+     csvfile csv("decisionTree.csv"); 
+
+     csv << "NodeID" << "level" << "hasChild" << "relation" << "trueNode" << "falseNode"  << endrow;
+
+     unordered_map<treeNode*, int> mymap;
+     static int idx = 0; 
+
+     printCSV(root, csv,  0, mymap, idx);
+   }
+   catch (const std::exception &ex)
+    {
+        std::cout << "Exception was thrown: " << ex.what() << std::endl;
+    }
+  
+    return 0;
 }

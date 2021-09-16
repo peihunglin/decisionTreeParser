@@ -3,6 +3,7 @@
 #include <string>
 #include <regex>
 #include <vector>
+#include <unordered_map>
 
 enum class relationtype {LE, GT};  // less-and-equal or greater-than
 
