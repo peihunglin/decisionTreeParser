@@ -28,6 +28,7 @@ public:
     {
         fs_.exceptions(std::ios::failbit | std::ios::badbit);
         fs_.open(filename);
+	fs_<<std::fixed;
     }
 
     ~csvfile()

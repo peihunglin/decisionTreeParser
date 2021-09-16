@@ -67,17 +67,24 @@ void printCSV(treeNode* root, csvfile& csv, int treeLevel, unordered_map<treeNod
 
   if(root->isLeafNode())
   {
+    // print label
     csv << root->getLabel();
+    // print has child and relationOp
     csv << hasChild << "";
+    // print empty cell for relationVal
     csv.addEmptyCell(); 
+    // print empty cell for trueNode
+    csv.addEmptyCell(); 
+    // print empty cell for falseNode
     csv.addEmptyCell(); 
     csv << endrow;
   }
   else
   {
     csv.addEmptyCell(); 
-    string relationstr = edges[0].getRelation() + to_string(edges[0].getThreshold()); 
-    csv << hasChild << relationstr ;
+    //string relationstr = edges[0].getRelation() + to_string(edges[0].getThreshold()); 
+    //csv << hasChild << relationstr ;
+    csv << hasChild << edges[0].getRelation() << edges[0].getThreshold();
 
 
     for(int i=0; i < children.size(); ++i)
@@ -241,7 +248,7 @@ int main(int argc, char *argv[]){
    try {
      csvfile csv("decisionTree.csv"); 
 
-     csv << "NodeID" << "level" << "feature" << "label" << "hasChild"  << "relation" << "trueNode" << "falseNode"  << endrow;
+     csv << "NodeID" << "level" << "feature" << "label" << "hasChild"  << "relationOp" << "relationValue" << "trueNode" << "falseNode"  << endrow;
 
      unordered_map<treeNode*, int> mymap;
 
